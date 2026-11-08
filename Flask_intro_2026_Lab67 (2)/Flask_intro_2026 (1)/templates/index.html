@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">Welcome to my portfolio</p>
+    <h1>Welcome to My Website ♡</h1>
+    <p>
+        Welcome to my personal academic portfolio. This website presents
+        my profile, programming activities, and contact information in
+        one organized and accessible space.
+    </p>
+    <a class="button" href="{{ url_for('works') }}">Explore My Works ♡</a>
+    <a class="button secondary" href="{{ url_for('profile') }}">View Profile</a>
+</section>
+
+<section>
+    <h2>Discover My Website</h2>
+    <div class="grid">
+        <a class="card" href="{{ url_for('profile') }}">
+            <h3>♡ My Profile</h3>
+            <p>About the creator.</p>
+        </a>
+        <a class="card" href="{{ url_for('works') }}">
+            <h3>♡ My Works</h3>
+            <p>Explore my works that coverts and calculates</p>
+        </a>
+        <a class="card" href="{{ url_for('contacts') }}">
+            <h3>♡ Contact Me</h3>
+            <p>View my contact details and information.</p>
+        </a>
+    </div>
+</section>
+{% endblock %}

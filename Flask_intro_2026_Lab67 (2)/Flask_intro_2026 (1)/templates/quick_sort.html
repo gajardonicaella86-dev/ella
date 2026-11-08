@@ -1,0 +1,584 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.sort-container {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 8px 24px #dba1bd12;
+}
+
+.sort-container h2 {
+    margin-top: 0;
+}
+
+.sort-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.sort-controls label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.sort-controls input,
+.sort-controls select {
+    width: 100%;
+}
+
+.sort-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 18px 0;
+}
+
+.sort-buttons button {
+    flex: 1;
+    min-width: 140px;
+}
+
+.random-btn {
+    background: var(--light-pink);
+    color: var(--dark-pink);
+    border: 1px solid var(--border);
+}
+
+.random-btn:hover {
+    background: #f9dce9;
+}
+
+#status {
+    background: var(--light-pink);
+    color: var(--dark-pink);
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    margin: 20px 0;
+}
+
+.chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    min-height: 260px;
+    padding: 20px 10px 35px;
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto;
+}
+
+.bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 35px;
+    height: 230px;
+}
+
+.bar {
+    width: 100%;
+    min-width: 32px;
+    max-width: 55px;
+    background: linear-gradient(180deg, #e99cbd, #d96b9b);
+    border-radius: 10px 10px 3px 3px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 8px;
+    color: white;
+    font-weight: 800;
+    font-size: 0.85rem;
+    transition: height 0.3s ease, background 0.3s ease;
+}
+
+.bar.active {
+    background: linear-gradient(180deg, #b76b9d, #75566b);
+}
+
+.bar.sorted {
+    background: linear-gradient(180deg, #e8a6c4, #a94775);
+}
+
+.bar-value {
+    font-weight: 800;
+    color: var(--mauve);
+    margin-top: 8px;
+}
+
+#sort-message {
+    text-align: center;
+    color: var(--mauve);
+    font-size: 0.9rem;
+    margin-top: 15px;
+}
+
+#final-result {
+    background: var(--light-pink);
+    border-radius: 14px;
+    padding: 15px;
+    margin-top: 20px;
+    overflow-wrap: anywhere;
+    font-weight: 800;
+}
+
+@media (max-width: 600px) {
+    .sort-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .sort-container {
+        padding: 18px;
+    }
+
+    .chart {
+        justify-content: flex-start;
+    }
+}
+</style>
+
+<p class="eyebrow">Sorting Algorithm</p>
+<h1>Sorting Visualizer ♡</h1>
+<p>Explore five sorting algorithms and watch how they organize numbers step by step.</p>
+
+<div class="sort-container">
+
+    <h2>Enter Numbers</h2>
+    <p>Enter up to 8 numbers separated by commas.</p>
+
+    <input
+        type="text"
+        id="numbers"
+        placeholder="Example: 50, 20, 80, 10, 40, 70, 30, 60"
+    >
+
+    <div class="sort-controls">
+
+        <div>
+            <label for="algorithm">Choose Algorithm</label>
+            <select id="algorithm">
+                <option value="bubble">Bubble Sort</option>
+                <option value="selection">Selection Sort</option>
+                <option value="insertion">Insertion Sort</option>
+                <option value="merge">Merge Sort</option>
+                <option value="quick">Quick Sort</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="order">Order</label>
+            <select id="order">
+                <option value="asc">Smallest First</option>
+                <option value="desc">Largest First</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="sort-buttons">
+        <button id="sortButton" onclick="sortNumbers()">
+            SORT NUMBERS
+        </button>
+
+        <button class="random-btn" id="randomButton" onclick="randomNumbers()">
+            RANDOM NUMBERS
+        </button>
+    </div>
+
+    <div id="status">
+        Enter numbers or generate random numbers to get started!
+    </div>
+
+    <h3>Number Visualization</h3>
+    <div id="chart" class="chart"></div>
+
+    <p id="sort-message">Your numbers will appear here.</p>
+
+    <h3>Final Result</h3>
+    <div id="final-result">
+        Waiting for sorting...
+    </div>
+
+</div>
+
+<script>
+
+let numbers = [];
+let sorting = false;
+let frames = [];
+
+const chart = document.getElementById("chart");
+const statusBox = document.getElementById("status");
+const message = document.getElementById("sort-message");
+const result = document.getElementById("final-result");
+
+function updateStatus(text) {
+    statusBox.innerText = text;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function compare(a, b) {
+    const order = document.getElementById("order").value;
+
+    return order === "asc" ? a < b : a > b;
+}
+
+function renderChart(arr, active = [], sorted = false) {
+
+    chart.replaceChildren();
+
+    let min = Math.min(...arr);
+    let max = Math.max(...arr);
+    let range = max - min || 1;
+
+    arr.forEach((number, index) => {
+
+        let wrapper = document.createElement("div");
+        wrapper.className = "bar-wrapper";
+
+        let bar = document.createElement("div");
+        bar.className = "bar";
+
+        if (sorted) {
+            bar.classList.add("sorted");
+        } else if (active.includes(index)) {
+            bar.classList.add("active");
+        }
+
+        let height = 45 + ((number - min) / range) * 155;
+
+        bar.style.height = height + "px";
+        bar.innerText = number;
+
+        let value = document.createElement("span");
+        value.className = "bar-value";
+        value.innerText = index + 1;
+
+        wrapper.appendChild(bar);
+        wrapper.appendChild(value);
+
+        chart.appendChild(wrapper);
+    });
+}
+
+function saveFrame(arr, active, description) {
+
+    frames.push({
+        arr: [...arr],
+        active: [...active],
+        description: description
+    });
+
+}
+
+// BUBBLE SORT
+
+function bubbleSort(arr) {
+
+    for (let i = 0; i < arr.length - 1; i++) {
+
+        for (let j = 0; j < arr.length - i - 1; j++) {
+
+            saveFrame(arr, [j, j + 1], "Comparing " + arr[j] + " and " + arr[j + 1]);
+
+            if (compare(arr[j + 1], arr[j])) {
+
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+
+                saveFrame(arr, [j, j + 1], "Swapping numbers");
+
+            }
+        }
+    }
+
+    return arr;
+}
+
+// SELECTION SORT
+
+function selectionSort(arr) {
+
+    for (let i = 0; i < arr.length - 1; i++) {
+
+        let minIndex = i;
+
+        for (let j = i + 1; j < arr.length; j++) {
+
+            saveFrame(arr, [minIndex, j], "Finding the next smallest number");
+
+            if (compare(arr[j], arr[minIndex])) {
+                minIndex = j;
+            }
+        }
+
+        if (minIndex !== i) {
+
+            [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+
+            saveFrame(arr, [i, minIndex], "Moving the selected number");
+
+        }
+    }
+
+    return arr;
+}
+
+// INSERTION SORT
+
+function insertionSort(arr) {
+
+    for (let i = 1; i < arr.length; i++) {
+
+        let current = arr[i];
+        let j = i - 1;
+
+        while (j >= 0 && compare(current, arr[j])) {
+
+            saveFrame(arr, [j, j + 1], "Comparing and shifting numbers");
+
+            arr[j + 1] = arr[j];
+
+            saveFrame(arr, [j, j + 1], "Shifting number to the right");
+
+            j--;
+        }
+
+        arr[j + 1] = current;
+
+        saveFrame(arr, [j + 1], "Inserting " + current + " into its correct position");
+
+    }
+
+    return arr;
+}
+
+// MERGE SORT
+
+function mergeSort(arr, start = 0) {
+
+    if (arr.length <= 1) {
+        return arr;
+    }
+
+    let middle = Math.floor(arr.length / 2);
+
+    let left = mergeSort(arr.slice(0, middle), start);
+
+    let right = mergeSort(arr.slice(middle), start + middle);
+
+    let merged = [];
+    let i = 0;
+    let j = 0;
+
+    while (i < left.length && j < right.length) {
+
+        if (compare(left[i], right[j])) {
+            merged.push(left[i]);
+            i++;
+        } else {
+            merged.push(right[j]);
+            j++;
+        }
+    }
+
+    merged = merged.concat(left.slice(i), right.slice(j));
+
+    for (let k = 0; k < merged.length; k++) {
+        numbersForMerge[start + k] = merged[k];
+    }
+
+    saveFrame(
+        numbersForMerge,
+        Array.from({length: merged.length}, (_, i) => start + i),
+        "Merging divided groups"
+    );
+
+    return merged;
+}
+
+let numbersForMerge = [];
+
+// QUICK SORT
+
+function quickSort(arr, low, high) {
+
+    if (low < high) {
+
+        let pivot = arr[high];
+        let i = low - 1;
+
+        for (let j = low; j < high; j++) {
+
+            saveFrame(arr, [j, high], "Comparing " + arr[j] + " with pivot " + pivot);
+
+            if (compare(arr[j], pivot)) {
+
+                i++;
+
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+
+                saveFrame(arr, [i, j], "Moving number before the pivot");
+
+            }
+        }
+
+        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+
+        let pivotIndex = i + 1;
+
+        saveFrame(arr, [pivotIndex], "Pivot " + pivot + " is now in its correct position");
+
+        quickSort(arr, low, pivotIndex - 1);
+        quickSort(arr, pivotIndex + 1, high);
+    }
+
+    return arr;
+}
+
+// GET USER INPUT
+
+function getNumbers() {
+
+    let input = document.getElementById("numbers").value.trim();
+
+    if (input === "") {
+        updateStatus("Please enter numbers first!");
+        return null;
+    }
+
+    let values = input.split(",");
+
+    if (values.some(value => value.trim() === "")) {
+        updateStatus("Please separate your numbers using commas correctly.");
+        return null;
+    }
+
+    let parsed = values.map(value => Number(value.trim()));
+
+    if (parsed.some(value => !Number.isFinite(value))) {
+        updateStatus("Please enter valid numbers only!");
+        return null;
+    }
+
+    if (parsed.length > 8) {
+        updateStatus("You can only enter up to 8 numbers!");
+        return null;
+    }
+
+    return parsed;
+}
+
+// SORT NUMBERS
+
+async function sortNumbers() {
+
+    if (sorting) return;
+
+    let inputNumbers = getNumbers();
+
+    if (!inputNumbers) return;
+
+    numbers = [...inputNumbers];
+    frames = [];
+
+    sorting = true;
+
+    document.getElementById("sortButton").disabled = true;
+    document.getElementById("randomButton").disabled = true;
+
+    updateStatus("Sorting in progress... Please wait!");
+    result.innerText = "Sorting...";
+    message.innerText = "Preparing animation...";
+
+    let algorithm = document.getElementById("algorithm").value;
+    let sorted;
+
+    let arr = [...numbers];
+
+    if (algorithm === "bubble") {
+        sorted = bubbleSort(arr);
+    } else if (algorithm === "selection") {
+        sorted = selectionSort(arr);
+    } else if (algorithm === "insertion") {
+        sorted = insertionSort(arr);
+    } else if (algorithm === "merge") {
+        numbersForMerge = [...arr];
+        sorted = mergeSort(arr);
+    } else {
+        sorted = quickSort(arr, 0, arr.length - 1);
+    }
+
+    if (frames.length === 0) {
+        saveFrame(sorted, [], "Numbers are already sorted");
+    }
+
+    for (let frame of frames) {
+
+        renderChart(frame.arr, frame.active);
+
+        message.innerText = frame.description;
+
+        await sleep(450);
+    }
+
+    renderChart(sorted, [], true);
+
+    updateStatus("Sorting completed successfully! ♡");
+
+    message.innerText = "All numbers are now arranged in the selected order.";
+
+    result.innerText =
+        "Sorted Numbers: " + sorted.join(", ");
+
+    sorting = false;
+
+    document.getElementById("sortButton").disabled = false;
+    document.getElementById("randomButton").disabled = false;
+
+}
+
+// RANDOM NUMBERS
+
+function randomNumbers() {
+
+    if (sorting) return;
+
+    numbers = Array.from(
+        {length: 8},
+        () => Math.floor(Math.random() * 99) + 1
+    );
+
+    document.getElementById("numbers").value = numbers.join(", ");
+
+    renderChart(numbers);
+
+    updateStatus("Random numbers are ready to sort! ♡");
+
+    message.innerText = "Your 8 random numbers are ready.";
+
+    result.innerText = "Waiting for sorting...";
+
+}
+
+// INPUT STATUS
+
+document.getElementById("numbers").addEventListener("input", function() {
+
+    if (sorting) return;
+
+    updateStatus("Numbers are ready to sort when you click the button.");
+
+});
+
+</script>
+
+{% endblock %}

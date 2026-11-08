@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p class="eyebrow">Programming Activity </p>
+<h1>Queue ♡</h1>
+
+<section class="panel">
+
+    <!-- INPUT -->                      
+    <h2>Enter Numbers</h2>
+    <p class="small">
+        Enter numbers separated by commas.
+        Example: 10, 20, 30, 40, 50
+    </p>
+
+    <input id="numbers" placeholder="10, 20, 30, 40, 50">
+
+    <div class="item-list">
+        <button onclick="enterNumbers()">Enter Numbers</button>
+        <button onclick="clearAll()">Clear All</button>
+    </div>
+
+    <hr>
+
+    <!-- STANDARD QUEUE -->
+    <h2>Standard Queue</h2>
+    <p class="small">FIFO: First In, First Out</p>
+
+    <div class="item-list">
+        <button onclick="enqueue()">Enqueue</button>
+        <button onclick="dequeue()">Dequeue</button>
+        <button onclick="addFront()">Add Front</button>
+        <button onclick="addRear()">Add Rear</button>
+        <button onclick="removeFront()">Remove Front</button>
+        <button onclick="removeRear()">Remove Rear</button>
+    </div>
+
+    <div id="queueDisplay" class="item-list"></div>
+
+    <div id="queueResult" class="result">
+        Enter numbers first.
+    </div>
+
+</section>
+
+<script>
+
+/* DATA STRUCTURE */
+let queue = [];
+
+
+/* GET INPUT NUMBERS */
+function getNumbers() {
+    let input = document.getElementById("numbers").value;
+
+    let numbers = input
+        .split(",")
+        .map(x => x.trim())
+        .filter(x => x !== "")
+        .map(Number);
+
+    if (numbers.length === 0 || numbers.some(isNaN)) {
+        alert("Please enter valid numbers separated by commas.");
+        return null;
+    }
+
+    return numbers;
+}
+
+
+/* CLEAR INPUT */
+function clearInput() {
+    document.getElementById("numbers").value = "";
+}
+
+
+/* ENTER NUMBERS */
+function enterNumbers() {
+    let numbers = getNumbers();
+
+    if (numbers === null) {
+        return;
+    }
+
+    queue = [...numbers];
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Numbers entered."
+    );
+
+    clearInput();
+}
+
+
+/* ENQUEUE - Adds to REAR */
+function enqueue() {
+    let numbers = getNumbers();
+
+    if (numbers === null) {
+        return;
+    }
+
+    let value = numbers[numbers.length - 1];
+
+    queue.push(value);
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Enqueued: " + value
+    );
+
+    clearInput();
+}
+
+
+/* DEQUEUE - Removes from FRONT */
+function dequeue() {
+    if (queue.length === 0) {
+        document.getElementById("queueResult").textContent =
+            "Queue is empty.";
+        return;
+    }
+
+    let removed = queue.shift();
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Dequeued: " + removed
+    );
+
+    clearInput();
+}
+
+
+/* ADD FRONT */
+function addFront() {
+    let numbers = getNumbers();
+
+    if (numbers === null) {
+        return;
+    }
+
+    let value = numbers[0];
+
+    queue.unshift(value);
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Added to Front: " + value
+    );
+
+    clearInput();
+}
+
+
+/* ADD REAR */
+function addRear() {
+    let numbers = getNumbers();
+
+    if (numbers === null) {
+        return;
+    }
+
+    let value = numbers[numbers.length - 1];
+
+    queue.push(value);
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Added to Rear: " + value
+    );
+
+    clearInput();
+}
+
+
+/* REMOVE FRONT */
+function removeFront() {
+    if (queue.length === 0) {
+        document.getElementById("queueResult").textContent =
+            "Queue is empty.";
+        return;
+    }
+
+    let removed = queue.shift();
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Removed Front: " + removed
+    );
+
+    clearInput();
+}
+
+
+/* REMOVE REAR */
+function removeRear() {
+    if (queue.length === 0) {
+        document.getElementById("queueResult").textContent =
+            "Queue is empty.";
+        return;
+    }
+
+    let removed = queue.pop();
+
+    display(
+        queue,
+        "queueDisplay",
+        "queueResult",
+        "Removed Rear: " + removed
+    );
+
+    clearInput();
+}
+
+
+/* DISPLAY */
+function display(items, displayId, resultId, message) {
+    let displayBox = document.getElementById(displayId);
+    let result = document.getElementById(resultId);
+
+    displayBox.replaceChildren();
+
+    items.forEach((value) => {
+        let item = document.createElement("span");
+        item.className = "item";
+        item.textContent = value;
+        displayBox.appendChild(item);
+    });
+
+    result.textContent =
+        message + " | Size: " + items.length;
+}
+
+
+/* CLEAR ALL */
+function clearAll() {
+    document.getElementById("numbers").value = "";
+
+    queue = [];
+
+    document.getElementById("queueDisplay").replaceChildren();
+
+    document.getElementById("queueResult").textContent =
+        "Enter numbers first.";
+}
+
+</script>
+
+{% endblock %}

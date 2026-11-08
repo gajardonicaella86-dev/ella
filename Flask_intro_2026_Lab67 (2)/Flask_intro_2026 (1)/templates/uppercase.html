@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Programming activity </p>
+<h1>To Uppercase ♡</h1>
+
+<section class="panel">
+    <form id="upperForm">
+        <label for="inputText">Enter your text</label>
+        <textarea id="inputText" rows="4" placeholder="Type something here..." required></textarea>
+        <button type="submit">Convert to Uppercase</button>
+    </form>
+    <div class="result" id="upperResult" hidden></div>
+</section>
+
+<script>
+document.getElementById("upperForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const text = document.getElementById("inputText").value;
+    const result = document.getElementById("upperResult");
+    result.textContent = "Result: " + text.toUpperCase();
+    result.hidden = false;
+});
+</script>
+{% endblock %}

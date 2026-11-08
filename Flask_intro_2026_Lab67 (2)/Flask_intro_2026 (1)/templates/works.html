@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p class="eyebrow">Academic activities</p>
+<h1>My Works ♡</h1>
+<p>Choose an activity below to open its interactive programming page.</p>
+
+<div class="grid">
+    <a class="card" href="{{ url_for('uppercase') }}">
+        <h3>To Uppercase</h3>
+        <p>Convert lowercase or mixed-case text to uppercase letters.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('circle') }}">
+        <h3>Area of a Circle</h3>
+        <p>Calculate a circle's area using its radius.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('triangle') }}">
+        <h3>Area of a Triangle</h3>
+        <p>Calculate a triangle's area using its base and height.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('linked_list') }}">
+        <h3>Linked List Operations</h3>
+        <p>Add, remove, and view linked list elements.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('infix_postfix') }}">
+        <h3>Infix to Postfix</h3>
+        <p>Convert mathematical expressions into postfix notation.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('stack') }}">
+        <h3>Stack Operations</h3>
+        <p>Practice push, pop, and peek operations.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('queue_deque') }}">
+        <h3>Queues and Deques</h3>
+        <p>Explore enqueue, dequeue, and double-ended queue operations.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <a class="card" href="{{ url_for('quick_sort') }}">
+        <h3>Quick Sort Algorithm</h3>
+        <p>Arrange numbers in ascending order using the Quick Sort algorithm.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+    <!-- BINARY TREE -->
+    <a class="card" href="{{ url_for('binary_tree') }}">
+        <h3>Binary Tree Operations</h3>
+        <p>Insert, search, delete, and perform postorder traversal.</p>
+        <span class="button">Open Activity →</span>
+    </a>
+
+</div>
+{% endblock %}

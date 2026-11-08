@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Programming activity </p>
+<h1>Area of a Triangle ♡</h1>
+
+<section class="panel">
+    <p>Enter the base and height of the triangle.</p>
+    <p><strong>Formula:</strong> A = ½ × base × height</p>
+
+    <form id="triangleForm">
+        <label for="base">Base</label>
+        <input id="base" type="number" min="0" step="any" required>
+
+        <label for="height">Height</label>
+        <input id="height" type="number" min="0" step="any" required>
+
+        <button type="submit">Calculate Area</button>
+    </form>
+    <div class="result" id="triangleResult" hidden></div>
+</section>
+
+<script>
+document.getElementById("triangleForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const b = Number(document.getElementById("base").value);
+    const h = Number(document.getElementById("height").value);
+    const result = document.getElementById("triangleResult");
+
+    if (!Number.isFinite(b) || !Number.isFinite(h) || b < 0 || h < 0) {
+        result.textContent = "Please enter valid non-negative values.";
+    } else {
+        result.textContent = "Area = " + (0.5 * b * h).toFixed(2) + " square units";
+    }
+    result.hidden = false;
+});
+</script>
+{% endblock %}

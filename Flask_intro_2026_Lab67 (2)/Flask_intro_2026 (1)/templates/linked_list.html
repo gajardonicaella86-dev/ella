@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Programming activity </p>
+<h1>Linked List Operations ♡</h1>
+
+<section class="panel">
+    <label for="nodeValue">Node value</label>
+    <input id="nodeValue" placeholder="Enter a value">
+
+    <div class="item-list">
+        <button onclick="addNode()">Add Node</button>
+        <button onclick="removeNode()">Remove First</button>
+        <button onclick="removeLast()">Remove Last</button>
+        <button onclick="clearNodes()">Clear List</button>
+    </div>
+
+    <h3>Linked List Visualization</h3>
+    <div id="nodes" class="item-list"></div>
+    <div id="listResult" class="result">The linked list is empty.</div>
+</section>
+
+<script>
+let linkedList = [];
+
+function renderList(message = "") {
+    const container = document.getElementById("nodes");
+    container.replaceChildren();
+
+    linkedList.forEach((value, index) => {
+        const node = document.createElement("span");
+        node.className = "item";
+        node.textContent = value + (index < linkedList.length - 1 ? " →" : " → NULL");
+        container.appendChild(node);
+    });
+
+    document.getElementById("listResult").textContent =
+        message || (linkedList.length ? "Nodes: " + linkedList.length : "The linked list is empty.");
+}
+
+function addNode() {
+    const input = document.getElementById("nodeValue");
+    const value = input.value.trim();
+
+    if (!value) {
+        renderList("Please enter a node value.");
+        return;
+    }
+
+    linkedList.push(value);
+    input.value = "";
+    renderList("Node added successfully.");
+}
+
+function removeNode() {
+    if (!linkedList.length) return renderList("The linked list is empty.");
+    linkedList.shift();
+    renderList("First node removed.");
+}
+
+function removeLast() {
+    if (!linkedList.length) return renderList("The linked list is empty.");
+    linkedList.pop();
+    renderList("Last node removed.");
+}
+
+function clearNodes() {
+    linkedList = [];
+    renderList("Linked list cleared.");
+}
+
+renderList();
+</script>
+{% endblock %}

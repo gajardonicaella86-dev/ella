@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .bt-panel {
+        background: #fff0f6;
+        border: 1px solid #f1d5e2;
+        border-radius: 18px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .bt-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .bt-controls input {
+        flex: 1;
+        min-width: 140px;
+        padding: 12px;
+        border: 1px solid #f1d5e2;
+        border-radius: 10px;
+        font: inherit;
+    }
+
+    .bt-controls button {
+        background: #d96b9b;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 11px 17px;
+        cursor: pointer;
+        font: inherit;
+        transition: .2s;
+    }
+
+    .bt-controls button:hover {
+        background: #a94775;
+        transform: translateY(-2px);
+    }
+
+    .bt-result {
+        background: #fffaf7;
+        border: 1px solid #f1d5e2;
+        border-radius: 10px;
+        padding: 13px;
+        color: #75566b;
+        margin-top: 15px;
+    }
+
+    .bt-visual {
+        background: #fff0f6;
+        border: 1px solid #f1d5e2;
+        border-radius: 18px;
+        padding: 15px;
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    .bt-visual svg {
+        display: block;
+        width: 100%;
+        min-width: 320px;
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .bt-line {
+        stroke: #d96b9b;
+        stroke-width: 2.5;
+        stroke-dasharray: 200;
+        stroke-dashoffset: 200;
+        animation: draw .6s ease forwards;
+    }
+
+    .bt-node {
+        opacity: 0;
+        animation: pop .4s ease forwards;
+    }
+
+    .bt-node circle {
+        fill: #d96b9b;
+        stroke: #a94775;
+        stroke-width: 2;
+    }
+
+    .bt-node text {
+        fill: white;
+        font-size: 13px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: middle;
+    }
+
+    .bt-empty {
+        text-align: center;
+        color: #75566b;
+        padding: 60px 10px;
+    }
+
+    @keyframes pop {
+        from {
+            opacity: 0;
+            transform: scale(.2);
+            transform-origin: center;
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+            transform-origin: center;
+        }
+    }
+
+    @keyframes draw {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+</style>
+
+<p class="eyebrow">Data Structure Activity</p>
+<h1>Binary Tree ♡</h1>
+<p>Explore Binary Search Tree operations through an interactive visualization.</p>
+
+<div class="bt-panel">
+    <h2>Tree Operations</h2>
+
+    <div class="bt-controls">
+        <input
+            type="text"
+            id="treeInput"
+            placeholder="Enter a letter or number"
+            maxlength="12"
+        >
+        <button onclick="insertNode()">Insert</button>
+        <button onclick="searchNode()">Search</button>
+        <button onclick="deleteNode()">Delete</button>
+    </div>
+
+    <div class="bt-controls">
+        <button onclick="postorder()">Postorder Traversal</button>
+        <button onclick="clearTree()">Clear Tree</button>
+    </div>
+
+    <div class="bt-result" id="treeResult">
+        Enter a letter or number to begin.
+    </div>
+</div>
+
+<div class="bt-visual">
+    <h2 style="text-align:center;">Binary Search Tree</h2>
+    <div id="treeDisplay">
+        <div class="bt-empty">Your tree will appear here ♡</div>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById("treeInput");
+    const result = document.getElementById("treeResult");
+    const display = document.getElementById("treeDisplay");
+
+    async function sendRequest(url, method = "POST", data = null) {
+        try {
+            const options = { method };
+
+            if (data !== null) {
+                options.headers = {
+                    "Content-Type": "application/json"
+                };
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(url, options);
+
+            if (!response.ok) {
+                throw new Error("Request failed.");
+            }
+
+            return await response.json();
+
+        } catch (error) {
+            result.textContent = "Something went wrong. Please try again.";
+            return null;
+        }
+    }
+
+    function getKey() {
+        const value = input.value.trim();
+
+        if (value === "") {
+            result.textContent = "Please enter a letter or number.";
+            return null;
+        }
+
+        return value;
+    }
+
+    async function insertNode() {
+        const key = getKey();
+        if (key === null) return;
+
+        const data = await sendRequest(
+            "/binary-tree/insert", "POST", { key }
+        );
+
+        if (!data) return;
+
+        result.textContent = data.message;
+        drawTree(data.tree);
+        input.value = "";
+    }
+
+    async function searchNode() {
+        const key = getKey();
+        if (key === null) return;
+
+        const data = await sendRequest(
+            "/binary-tree/search", "POST", { key }
+        );
+
+        if (!data) return;
+
+        result.textContent = data.message;
+    }
+
+    async function deleteNode() {
+        const key = getKey();
+        if (key === null) return;
+
+        const data = await sendRequest(
+            "/binary-tree/delete", "POST", { key }
+        );
+
+        if (!data) return;
+
+        result.textContent = data.message;
+        drawTree(data.tree);
+        input.value = "";
+    }
+
+    async function postorder() {
+        const data = await sendRequest(
+            "/binary-tree/postorder", "GET"
+        );
+
+        if (!data) return;
+
+        result.textContent =
+            "Postorder Traversal: " +
+            (data.traversal.length
+                ? data.traversal.join(" → ")
+                : "Tree is empty.");
+    }
+
+    async function clearTree() {
+        const data = await sendRequest(
+            "/binary-tree/clear", "POST"
+        );
+
+        if (!data) return;
+
+        result.textContent = data.message;
+        drawTree(null);
+        input.value = "";
+    }
+
+    function escapeXml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&apos;"
+        })[char]);
+    }
+
+    function drawTree(root) {
+        if (!root) {
+            display.innerHTML =
+                '<div class="bt-empty">Your tree is empty ♡</div>';
+            return;
+        }
+
+        const nodes = [];
+        let position = 0;
+
+        function assignPositions(node, depth) {
+            if (!node) return;
+
+            assignPositions(node.left, depth + 1);
+
+            nodes.push({
+                key: node.key,
+                x: position++,
+                y: depth,
+                left: node.left,
+                right: node.right
+            });
+
+            assignPositions(node.right, depth + 1);
+        }
+
+        assignPositions(root, 0);
+
+        const width = Math.max(320, position * 90);
+        const height = Math.max(
+            180,
+            (Math.max(...nodes.map(n => n.y)) + 1) * 90
+        );
+
+        const positions = new Map();
+
+        nodes.forEach(node => {
+            positions.set(String(node.key), {
+                x: 45 + node.x * 90,
+                y: 45 + node.y * 90
+            });
+        });
+
+        let lines = "";
+        let circles = "";
+
+        function drawConnections(node) {
+            if (!node) return;
+
+            const current = positions.get(String(node.key));
+
+            [node.left, node.right].forEach(child => {
+                if (child) {
+                    const target = positions.get(String(child.key));
+
+                    lines += `
+                        <line class="bt-line"
+                            x1="${current.x}" y1="${current.y}"
+                            x2="${target.x}" y2="${target.y}" />
+                    `;
+
+                    drawConnections(child);
+                }
+            });
+        }
+
+        function drawNodes(node) {
+            if (!node) return;
+
+            const point = positions.get(String(node.key));
+
+            circles += `
+                <g class="bt-node">
+                    <circle cx="${point.x}" cy="${point.y}" r="23"/>
+                    <text x="${point.x}" y="${point.y}">
+                        ${escapeXml(node.key)}
+                    </text>
+                </g>
+            `;
+
+            drawNodes(node.left);
+            drawNodes(node.right);
+        }
+
+        drawConnections(root);
+        drawNodes(root);
+
+        display.innerHTML = `
+            <svg viewBox="0 0 ${width} ${height}"
+                 role="img"
+                 aria-label="Binary search tree">
+                ${lines}
+                ${circles}
+            </svg>
+        `;
+    }
+</script>
+{% endblock %}

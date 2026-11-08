@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p class="eyebrow">Get to know me</p>
+<h1>My Profile ♡</h1>
+
+<section class="panel">
+
+    <!-- PROFILE PICTURE -->
+    <div style="text-align:center; margin-bottom:30px;">
+
+        <img
+            id="profilePicture"
+            src="{{ url_for('static', filename='profile.jpg') }}"
+            alt="Profile Picture"
+            style="
+                width:150px;
+                height:150px;
+                object-fit:cover;
+                border-radius:50%;
+                border:5px solid #f1d5e2;
+                display:block;
+                margin:0 auto 15px;
+            "
+        >
+
+        <input
+            type="file"
+            id="profileInput"
+            accept="image/*"
+            style="display:none;"
+            onchange="changeProfilePicture(event)"
+        >
+
+        <button
+            type="button"
+            class="button"
+            onclick="document.getElementById('profileInput').click()"
+        >
+            Change Profile Picture
+        </button>
+
+        <button
+            type="button"
+            class="button"
+            onclick="removeProfilePicture()"
+        >
+            Remove Picture
+        </button>
+
+        <p class="small">
+            Your profile picture will be saved automatically.
+        </p>
+
+    </div>
+
+
+    <!-- PERSONAL INTRODUCTION -->
+    <h2>Personal Introduction</h2>
+
+    <p>
+        Hi I'm a student at the Polytechnic University of the Philippines,
+        pursuing a degree in Bachelor of Science in Computer Engineering.
+    </p>
+
+
+    <!-- PERSONAL INFORMATION -->
+    <h2>Personal Information</h2>
+
+    <p>
+        <strong>Name:</strong>
+        Nica Ella Pajarillo Gajardo
+    </p>
+
+    <p>
+        <strong>Course/Section:</strong>
+        BSCPE 2-3
+    </p>
+
+    <p>
+        <strong>Id Number:</strong>
+        202517050MN0
+    <p>
+        <strong>School:</strong>
+        Polytechnic University of the Philippines
+    </p>
+
+    <p>
+        <strong>Interests:</strong>
+        Web development, programming, technology, Science
+    </p>
+
+
+
+    <a class="button" href="{{ url_for('works') }}">
+        View My Works
+    </a>
+
+</section>
+
+
+<script>
+
+/* =========================
+   LOAD SAVED PROFILE
+   ========================= */
+
+window.onload = function() {
+
+    let savedPicture =
+        localStorage.getItem("profilePicture");
+
+    if (savedPicture) {
+
+        document.getElementById("profilePicture").src =
+            savedPicture;
+    }
+};
+
+
+/* =========================
+   CHANGE PROFILE PICTURE
+   ========================= */
+
+function changeProfilePicture(event) {
+
+    let file = event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    // Check if selected file is an image
+    if (!file.type.startsWith("image/")) {
+
+        alert("Please select an image file.");
+        return;
+    }
+
+    let reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        let image =
+            e.target.result;
+
+        // Show new picture
+        document.getElementById("profilePicture").src =
+            image;
+
+        // Save picture
+        localStorage.setItem(
+            "profilePicture",
+            image
+        );
+    };
+
+    reader.readAsDataURL(file);
+}
+
+
+/* =========================
+   REMOVE PROFILE PICTURE
+   ========================= */
+
+function removeProfilePicture() {
+
+    localStorage.removeItem("profilePicture");
+
+    document.getElementById("profilePicture").src =
+        "{{ url_for('static', filename='profile.jpg') }}";
+}
+
+</script>
+
+{% endblock %}

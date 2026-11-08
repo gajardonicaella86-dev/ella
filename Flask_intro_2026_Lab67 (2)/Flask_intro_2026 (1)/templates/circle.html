@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Programming activity </p>
+<h1>Area of a Circle ♡</h1>
+
+<section class="panel">
+    <p>Enter the radius to calculate the area of the circle.</p>
+    <p><strong>Formula:</strong> A = πr²</p>
+
+    <form id="circleForm">
+        <label for="radius">Radius</label>
+        <input id="radius" type="number" min="0" step="any" required placeholder="Enter radius">
+        <button type="submit">Calculate Area</button>
+    </form>
+    <div class="result" id="circleResult" hidden></div>
+</section>
+
+<script>
+document.getElementById("circleForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const r = Number(document.getElementById("radius").value);
+    const result = document.getElementById("circleResult");
+
+    if (!Number.isFinite(r) || r < 0) {
+        result.textContent = "Please enter a valid non-negative radius.";
+    } else {
+        result.textContent = "Area = " + (Math.PI * r * r).toFixed(2) + " square units";
+    }
+    result.hidden = false;
+});
+</script>
+{% endblock %}

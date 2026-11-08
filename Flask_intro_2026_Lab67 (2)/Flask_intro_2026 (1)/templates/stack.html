@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Programming activity </p>
+<h1>Stack Operations ♡</h1>
+
+<section class="panel">
+    <label for="stackValue">Element value</label>
+    <input id="stackValue" placeholder="Enter an element">
+
+    <div class="item-list">
+        <button onclick="pushItem()">Push</button>
+        <button onclick="popItem()">Pop</button>
+        <button onclick="peekItem()">Peek</button>
+        <button onclick="clearStack()">Clear Stack</button>
+    </div>
+
+    <h3>Stack Visualization (Top to Bottom)</h3>
+    <div id="stackDisplay" class="item-list"></div>
+    <div id="stackResult" class="result">Stack is empty.</div>
+</section>
+
+<script>
+let stackItems = [];
+
+function renderStack(message) {
+    const display = document.getElementById("stackDisplay");
+    display.replaceChildren();
+
+    [...stackItems].reverse().forEach((value, index) => {
+        const item = document.createElement("span");
+        item.className = "item";
+        item.textContent = (index === 0 ? "TOP: " : "") + value;
+        display.appendChild(item);
+    });
+
+    document.getElementById("stackResult").textContent =
+        message || (stackItems.length ? "Stack size: " + stackItems.length : "Stack is empty.");
+}
+
+function pushItem() {
+    const input = document.getElementById("stackValue");
+    const value = input.value.trim();
+
+    if (!value) return renderStack("Please enter an element.");
+
+    stackItems.push(value);
+    input.value = "";
+    renderStack("Pushed: " + value);
+}
+
+function popItem() {
+    if (!stackItems.length) return renderStack("Cannot pop: stack is empty.");
+    renderStack("Popped: " + stackItems.pop());
+}
+
+function peekItem() {
+    if (!stackItems.length) return renderStack("Cannot peek: stack is empty.");
+    renderStack("Top element: " + stackItems.at(-1));
+}
+
+function clearStack() {
+    stackItems = [];
+    renderStack("Stack cleared.");
+}
+
+renderStack();
+</script>
+{% endblock %}

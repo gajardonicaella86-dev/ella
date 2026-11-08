@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Programming activity </p>
+<h1>Infix to Postfix ♡</h1>
+
+<section class="panel">
+    <p>Example: <code>A + B * C</code> becomes <code>A B C * +</code>.</p>
+
+    <form id="postfixForm">
+        <label for="expression">Infix Expression</label>
+        <input id="expression" placeholder="(A+B)*C" required>
+        <button type="submit">Convert Expression</button>
+    </form>
+
+    <div class="result" id="postfixResult" hidden></div>
+</section>
+
+<script>
+function infixToPostfix(expression) {
+    const tokens = expression.match(/\d+(?:\.\d+)?|[A-Za-z_]\w*|[()+\-*/^]/g);
+
+    if (!tokens || tokens.join("") !== expression.replace(/\s+/g, "")) {
+        throw new Error("Use valid operands and operators only.");
+    }
+
+    const precedence = { "+": 1, "-": 1, "*": 2, "/": 2, "^": 3 };
+    const output = [];
+    const operators = [];
+    let expectOperand = true;
+
+    for (const token of tokens) {
+        if (/^(?:\d+(?:\.\d+)?|[A-Za-z_]\w*)$/.test(token)) {
+            if (!expectOperand) throw new Error("Missing operator.");
+            output.push(token);
+            expectOperand = false;
+        } else if (token === "(") {
+            if (!expectOperand) throw new Error("Missing operator before parenthesis.");
+            operators.push(token);
+        } else if (token === ")") {
+            if (expectOperand) throw new Error("Invalid expression near parenthesis.");
+            while (operators.length && operators.at(-1) !== "(") {
+                output.push(operators.pop());
+            }
+            if (!operators.length) throw new Error("Mismatched parentheses.");
+            operators.pop();
+            expectOperand = false;
+        } else {
+            if (expectOperand) throw new Error("Missing operand.");
+            while (operators.length && operators.at(-1) !== "(") {
+                const top = operators.at(-1);
+                const shouldPop = token === "^"
+                    ? precedence[top] > precedence[token]
+                    : precedence[top] >= precedence[token];
+
+                if (!shouldPop) break;
+                output.push(operators.pop());
+            }
+            operators.push(token);
+            expectOperand = true;
+        }
+    }
+
+    if (expectOperand) throw new Error("Expression cannot end with an operator.");
+
+    while (operators.length) {
+        const op = operators.pop();
+        if (op === "(") throw new Error("Mismatched parentheses.");
+        output.push(op);
+    }
+
+    return output.join(" ");
+}
+
+document.getElementById("postfixForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const result = document.getElementById("postfixResult");
+
+    try {
+        result.textContent = "Postfix: " +
+            infixToPostfix(document.getElementById("expression").value);
+    } catch (error) {
+        result.textContent = "Error: " + error.message;
+    }
+
+    result.hidden = false;
+});
+</script>
+{% endblock %}
